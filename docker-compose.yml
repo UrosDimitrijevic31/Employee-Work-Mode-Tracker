@@ -27,6 +27,8 @@ services:
     environment:
       # Ensure backend container talks to the docker network host
       DATABASE_URL: postgresql://ewm:ewm_password@db:5432/ewm_db?schema=public
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
     ports:
       - "5050:5000"
     depends_on:
@@ -43,6 +45,9 @@ services:
     container_name: ewm-frontend
     env_file:
       - ./frontend/.env
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
     ports:
       - "5174:5173"
     depends_on:

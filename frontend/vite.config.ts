@@ -18,5 +18,10 @@ export default defineConfig({
   server: {
     port: 5173,
     host: true,
+    strictPort: true,
+    hmr: {
+      // When running in Docker with port mapping (5173 -> 5174), tell the client which host port to use
+      clientPort: Number(process.env.HMR_CLIENT_PORT || process.env.VITE_HMR_CLIENT_PORT || 5174),
+    },
   },
 });

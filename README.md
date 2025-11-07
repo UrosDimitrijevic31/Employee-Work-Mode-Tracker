@@ -72,6 +72,42 @@ Services (host):
 - Frontend: http://localhost:5174 (container listens on 5173)
 - Postgres: localhost:5433 (container 5432)
 
+### Hot Reload & Rebuild Rules
+
+Source edits in `backend/src` and `frontend/src` auto-reload (ts-node-dev & Vite HMR) when using:
+
+Option A (default):
+
+```bash
+docker compose up -d
+```
+
+Option B (with `develop.watch` if supported by your Docker Compose version):
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+```
+
+Rebuild images ONLY when:
+
+- You changed dependencies (`package.json` / lockfile)
+- You edited a Dockerfile
+- You need new system packages or changed Prisma binary targets
+
+Rebuild command:
+
+```bash
+docker compose build backend frontend && docker compose up -d
+```
+
+Reset database (drop volume) then migrate & seed:
+
+```bash
+docker compose down -v
+docker compose up -d
+docker exec -it ewm-backend sh -lc 'npx prisma migrate dev && npm run seed'
+```
+
 ### Prisma Migrations & Seed
 
 Initial setup (one-time per fresh DB):

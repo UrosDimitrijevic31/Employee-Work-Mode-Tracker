@@ -8,12 +8,14 @@ function Shell() {
       <header className="border-b p-4 flex items-center justify-between">
         <span className="font-semibold">Employee Work Mode Tracker</span>
         <nav className="flex gap-3 text-sm">
-          <Link to="/login">Login</Link>
+          <Link to="/login">Prijava</Link>
           {user && (
             <>
               <Link to="/dashboard">Dashboard</Link>
-              <Link to="/employees">Employees</Link>
-              <button onClick={logout} className="border px-2 py-1 rounded">Logout</button>
+              <Link to="/employees">Zaposleni</Link>
+              <button onClick={logout} className="border px-2 py-1 rounded">
+                Logout
+              </button>
             </>
           )}
         </nav>
