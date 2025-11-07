@@ -1,0 +1,29 @@
+import { Request, Response } from 'express';
+import jwt from 'jsonwebtoken';
+import { prisma } from '../prisma/client';
+import { comparePassword } from '../utils/hash';
+import { loginSchema } from '../schemas/auth.schema';
+import { env } from '../config/env';
+
+export async function login(req: Request, res: Response) {
+  const parse = loginSchema.safeParse(req.body);
+  if (!parse.success) {
+    return res.status(400).json({ errors: parse.error.flatten() });
+  }
+  const { email, password } = parse.data;
+  try {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+    const valid = await comparePassword(password, user.password);
+    if (!valid) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+    const token = jwt.sign({ id: user.id, role: user.role }, env.JWT_SECRET, { expiresIn: '8h' });
+    return res.json({ token, user: { id: user.id, name: user.name, role: user.role } });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ message: 'Server error' });
+  }
+}

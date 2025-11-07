@@ -1,0 +1,55 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: ewm-postgres
+    environment:
+      POSTGRES_USER: ewm
+      POSTGRES_PASSWORD: ewm_password
+      POSTGRES_DB: ewm_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ewm"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ewm-backend
+    env_file:
+      - ./backend/.env
+    environment:
+      # Ensure backend container talks to the docker network host
+      DATABASE_URL: postgresql://ewm:ewm_password@db:5432/ewm_db?schema=public
+    ports:
+      - "5050:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ewm-frontend
+    env_file:
+      - ./frontend/.env
+    ports:
+      - "5174:5173"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+volumes:
+  pgdata:

@@ -1,0 +1,49 @@
+// Prisma schema for Employee Work Mode Tracker
+
+generator client {
+  provider      = "prisma-client-js"
+  // Ensure Prisma engines are available for our Docker runtime (Debian/OpenSSL 3 on ARM64)
+  binaryTargets = ["native", "linux-arm64-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int         @id @default(autoincrement())
+  name      String
+  email     String      @unique
+  password  String
+  title     String?
+  role      Role
+  workLogs  WorkStatus[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
+
+enum Role {
+  employee
+  manager
+}
+
+model WorkStatus {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  date      DateTime @db.Date
+  status    Status
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, date], name: "userId_date")
+}
+
+enum Status {
+  remote
+  office
+  sick_leave
+  vacation
+  holiday
+}
